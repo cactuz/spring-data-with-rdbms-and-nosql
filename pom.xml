@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository so  you don't need versions in spring boot dependencies-->
 	</parent>
 	<groupId>com.udacity</groupId>
-	<artifactId>pricing-service</artifactId>
+	<artifactId>review-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>pricing-service</name>
+	<name>review-service</name>
 
 	<properties>
 		<java.version>1.8</java.version>
