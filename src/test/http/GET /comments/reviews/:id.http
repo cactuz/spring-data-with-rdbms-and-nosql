@@ -1,0 +1,7 @@
+### Pre-requisites:
+###     1) POST a product
+###     2) POST a review
+
+GET http://localhost:8080/comments/reviews/1
+
+###

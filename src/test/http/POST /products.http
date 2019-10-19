@@ -1,0 +1,17 @@
+POST http://localhost:8080/products/
+Content-Type: application/json
+
+{
+       "productName"  : "Super Awesome Shirt"
+}
+
+###
+
+POST http://localhost:8080/products/
+Content-Type: application/json
+
+{
+       "productName"  : "Cool Sneakers"
+}
+
+###

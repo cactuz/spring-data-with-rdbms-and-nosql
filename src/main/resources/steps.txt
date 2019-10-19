@@ -1,0 +1,7 @@
+1. Setup MySQL, create a DB and verify connectivity. - DONE
+2. Write SQL to create the required tables.
+3. Setup DB migration to run the above SQL.
+4. Define classes for required JPA Entities and identify relationships between them.
+5. Define required Spring Data JPA Repositories.
+6. Write tests for Repositories against an in-memory database (H2).
+7. Wire the Repository to the already provided REST Controller.

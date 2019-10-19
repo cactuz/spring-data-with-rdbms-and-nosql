@@ -1,0 +1,6 @@
+### Pre-requisite:
+###     1) POST a product
+
+GET http://localhost:8080/reviews/products/1
+
+###

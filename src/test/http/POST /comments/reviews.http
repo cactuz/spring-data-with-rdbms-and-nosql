@@ -1,0 +1,22 @@
+### Pre-requisite:
+###     1) POST /products
+###     2) POST /reviews
+### You may POST many comments to a review
+
+POST http://localhost:8080/comments/reviews/1
+Content-Type: application/json
+
+ {
+     "comment" : "I agree with you 100%."
+ }
+
+###
+
+POST http://localhost:8080/comments/reviews/1
+Content-Type: application/json
+
+{
+    "comment" : "Thanks for the tip."
+}
+
+###

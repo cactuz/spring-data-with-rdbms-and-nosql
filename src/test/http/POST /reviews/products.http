@@ -1,0 +1,21 @@
+### Pre-requisite:
+###     1) POST /products
+### You may POST many reviews to a product
+
+POST http://localhost:8080/reviews/products/1
+Content-Type: application/json
+
+ {
+     "review" : "Great quality. Very stylish."
+ }
+
+###
+
+POST http://localhost:8080/reviews/products/1
+Content-Type: application/json
+
+{
+    "review" : "An excellent gift. My mum liked it a lot."
+}
+
+###
