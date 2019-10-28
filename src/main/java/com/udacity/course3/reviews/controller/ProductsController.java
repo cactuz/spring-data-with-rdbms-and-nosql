@@ -1,16 +1,13 @@
 package com.udacity.course3.reviews.controller;
 
 import com.udacity.course3.reviews.repository.Product;
-import com.udacity.course3.reviews.repository.ProductRepository;
+import com.udacity.course3.reviews.repository.mysql.ProductRdbmsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +20,7 @@ import java.util.Optional;
 public class ProductsController {
 
     @Autowired
-    ProductRepository productRepository;
+    ProductRdbmsRepository productRdbmsRepository;
 
     /**
      * Creates a product.  Inspect header on successful response.
@@ -33,7 +30,7 @@ public class ProductsController {
     @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        Product savedProduct = productRepository.save(product);
+        Product savedProduct = productRdbmsRepository.save(product);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -52,8 +49,8 @@ public class ProductsController {
      */
     @RequestMapping(value = "/{id}")
     public ResponseEntity<Optional<Product>> findById(@PathVariable("id") Long id) {
-        if (productRepository.findById(id).isPresent()) {
-            return new ResponseEntity<>(productRepository.findById(id), HttpStatus.OK);
+        if (productRdbmsRepository.findById(id).isPresent()) {
+            return new ResponseEntity<>(productRdbmsRepository.findById(id), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -65,6 +62,6 @@ public class ProductsController {
      * @return The list of products.
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public List<Product> listProducts() { return productRepository.findAll();
+    public List<Product> listProducts() { return productRdbmsRepository.findAll();
     }
 }

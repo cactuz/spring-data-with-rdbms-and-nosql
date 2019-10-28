@@ -2,14 +2,16 @@ package com.udacity.course3.reviews.repository;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import javax.persistence.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Entity
+@Document("comment")
 public class Comment {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)

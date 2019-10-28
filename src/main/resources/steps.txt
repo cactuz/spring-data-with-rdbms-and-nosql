@@ -1,7 +1,8 @@
-1. Setup MySQL, create a DB and verify connectivity. - DONE
-2. Write SQL to create the required tables.
-3. Setup DB migration to run the above SQL.
-4. Define classes for required JPA Entities and identify relationships between them.
-5. Define required Spring Data JPA Repositories.
-6. Write tests for Repositories against an in-memory database (H2).
-7. Wire the Repository to the already provided REST Controller.
+Create a fully functioning REST API with polyglot persistence that can be inspected via a browser or a tool like Postman.
+
+Setup MongoDB and verify connectivity.
+Define classes for MongoDB model.
+Define required Spring Data MongoDB Repositories.
+Write a persistence service to read/write reviews from MongoDB. When loading reviews for a product, the service reads the ids from MySQL and the review document from MongoDB.
+Write tests for JPA & MongoDB repositories.
+Wire the review persistence service to the already provided REST Controller.

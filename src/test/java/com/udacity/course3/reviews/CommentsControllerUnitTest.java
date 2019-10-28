@@ -1,7 +1,13 @@
 package com.udacity.course3.reviews;
 
 import com.udacity.course3.reviews.controller.CommentsController;
-import com.udacity.course3.reviews.repository.*;
+import com.udacity.course3.reviews.repository.Comment;
+import com.udacity.course3.reviews.repository.mongodb.CommentMongoRepository;
+import com.udacity.course3.reviews.repository.mongodb.ReviewMongoRepository;
+import com.udacity.course3.reviews.repository.mysql.CommentRdbmsRepository;
+import com.udacity.course3.reviews.repository.Review;
+import com.udacity.course3.reviews.repository.mysql.ProductRdbmsRepository;
+import com.udacity.course3.reviews.repository.mysql.ReviewRdbmsRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,12 +15,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Example;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Optional;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -23,12 +30,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CommentsController.class)  //must match controller being tested
-public class CommentsControllerTest {
+@Import(value = {FakeMongo.class})
+public class CommentsControllerUnitTest {
 
     @MockBean
-    private CommentRepository commentRepository;
+    private ProductRdbmsRepository productRdbmsRepository;
     @MockBean
-    private ReviewRepository reviewRepository;
+    private CommentRdbmsRepository commentRdbmsRepository;
+    @MockBean
+    private ReviewRdbmsRepository reviewRdbmsRepository;
+    @MockBean
+    private ReviewMongoRepository reviewMongoRepository;
+    @MockBean
+    private CommentMongoRepository commentMongoRepository;
 
     @Autowired
     MockMvc mockMvc;
@@ -40,13 +54,14 @@ public class CommentsControllerTest {
     public void init() {
         comments = TestUtils.getComments();
         reviews = TestUtils.getReviews();
-        Mockito.when(reviewRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(reviews.get(0)));
-        Mockito.when(commentRepository.save(Mockito.any())).thenReturn(comments.get(0));
-        Mockito.when(commentRepository.getCommentByReviewReviewId(Mockito.anyLong())).thenReturn(comments);
+        Mockito.when(commentRdbmsRepository.getCommentByReviewReviewId(Mockito.anyLong())).thenReturn(comments);
     }
 
     @Test
     public void addACommentTest() throws Exception{
+        Mockito.when(reviewMongoRepository.existsById(Mockito.anyLong())).thenReturn(true);
+        Mockito.when(commentRdbmsRepository.save(Mockito.any())).thenReturn(comments.get(0));
+
         this.mockMvc.perform(post(COMMENTS_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"comment\" : " + "\"" + comments.get(0).getComment() + "\"}")
@@ -57,7 +72,23 @@ public class CommentsControllerTest {
     }
 
     @Test
-    public void retrieveCommentsForAReview() throws Exception{
+    public void retrieveCommentsForAReviewFromMongoDb() throws Exception{
+        Mockito.when(commentMongoRepository.findAll(Mockito.any(Example.class))).thenReturn(TestUtils.getComments());
+
+        this.mockMvc.perform(get(COMMENTS_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].commentId", is(1)))
+                .andExpect(jsonPath("$.[1].comment", is(comments.get(1).getComment())));
+    }
+
+    @Test
+    public void retrieveCommentsForAReviewFromRdbms() throws Exception{
+        Mockito.when(commentMongoRepository.findAll(Mockito.any(Example.class))).thenThrow(new RuntimeException());
+        Mockito.when(commentRdbmsRepository.findAll(Mockito.any(Example.class))).thenReturn(TestUtils.getComments());
+
         this.mockMvc.perform(get(COMMENTS_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -67,16 +98,3 @@ public class CommentsControllerTest {
                 .andExpect(jsonPath("$.[1].comment", is(comments.get(1).getComment())));
     }
 }
-
-/*
-[
-  {
-    "commentId": 1,
-    "comment": "I agree with you 100%."
-  },
-  {
-    "commentId": 2,
-    "comment": "Thanks for the tip."
-  }
-]
- */

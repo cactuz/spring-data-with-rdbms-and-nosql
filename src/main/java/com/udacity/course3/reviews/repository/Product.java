@@ -1,5 +1,6 @@
 package com.udacity.course3.reviews.repository;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -9,7 +10,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Entity
 public class Product {
     @Id
@@ -18,8 +18,8 @@ public class Product {
 
     private String productName;
 
-    //required, mappedBy looks for the field in the child entity (Review) that carries the matching
-    // @ManyToOne
+    //required, mappedBy looks for the field in the child entity (ReviewMongo) that carries the matching
     @OneToMany(mappedBy="product", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Review> reviews;
 }
