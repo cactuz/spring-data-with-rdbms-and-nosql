@@ -1,9 +1,12 @@
 package com.udacity.course3.reviews;
 
 import com.udacity.course3.reviews.controller.ProductsController;
+import com.udacity.course3.reviews.repository.Comment;
 import com.udacity.course3.reviews.repository.Product;
-import com.udacity.course3.reviews.repository.ProductRepository;
+import com.udacity.course3.reviews.repository.mysql.CommentRdbmsRepository;
+import com.udacity.course3.reviews.repository.mysql.ProductRdbmsRepository;
 
+import com.udacity.course3.reviews.repository.mysql.ReviewRdbmsRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +14,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,10 +29,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProductsController.class)  //must match controller being tested
-public class ProductsControllerTest {
+@Import(value = {FakeMongo.class})
+public class ProductsControllerUnitTest {
 
     @MockBean
-    private ProductRepository productRepository;
+    private ProductRdbmsRepository productRdbmsRepository;
+    @MockBean
+    private CommentRdbmsRepository commentRdbmsRepository;
+    @MockBean
+    private ReviewRdbmsRepository reviewRdbmsRepository;
+
     @Autowired
     MockMvc mockMvc;
     private static final String PRODUCTS_PATH = "/products/";
@@ -36,9 +47,9 @@ public class ProductsControllerTest {
     @Before
     public void init() {
         products = TestUtils.getProducts();
-        Mockito.when(productRepository.save(Mockito.any())).thenReturn(products.get(0));
-        Mockito.when(productRepository.findById(Mockito.any())).thenReturn(Optional.of(products.get(0)));
-        Mockito.when(productRepository.findAll()).thenReturn(products);
+        Mockito.when(productRdbmsRepository.save(Mockito.any())).thenReturn(products.get(0));
+        Mockito.when(productRdbmsRepository.findById(Mockito.any())).thenReturn(Optional.of(products.get(0)));
+        Mockito.when(productRdbmsRepository.findAll()).thenReturn(products);
     }
 
     @Test

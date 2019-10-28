@@ -1,21 +1,17 @@
 package com.udacity.course3.reviews.controller;
 
 import com.udacity.course3.reviews.repository.Product;
-import com.udacity.course3.reviews.repository.ProductRepository;
+import com.udacity.course3.reviews.repository.mysql.ProductRdbmsRepository;
 import com.udacity.course3.reviews.repository.Review;
-import com.udacity.course3.reviews.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Spring REST controller for working with review entity.
@@ -25,9 +21,13 @@ import java.util.Optional;
 public class ReviewsController {
 
     @Autowired
-    ReviewRepository reviewRepository;
+    com.udacity.course3.reviews.repository.mysql.ReviewRdbmsRepository reviewRdbmsRepository;
     @Autowired
-    ProductRepository productRepository;
+    ProductRdbmsRepository productRdbmsRepository;
+    @Autowired
+    com.udacity.course3.reviews.repository.mongodb.ReviewMongoRepository reviewMongoRepository;
+    @Autowired
+    CommentsController commentsController;
 
     /**
      * Creates a review for a product.
@@ -42,17 +42,27 @@ public class ReviewsController {
     @RequestMapping(value = "/products/{id}", method = RequestMethod.POST)
     public ResponseEntity<Review> createReviewForProduct(@PathVariable("id") Long productId,
                                                     @RequestBody Review review) {
-        Optional<Product> product = productRepository.findById(productId);
-        if (product.isPresent()) {
-            review.setProduct(product.get());  //this will provide for relationships to connect between Review And Product
-            Review savedReview = reviewRepository.save(review);
+
+        if (productRdbmsRepository.existsById(productId)) {
+
+            //This will provide for relationships to connect between ReviewMongo And Product
+            //also need to create a new instance of product and just set the id. one cannot use the
+            // product already stored from product repository productRdbmRepository because it
+            // will create a circular reference resulting ins stackoverflow
+            Product product = new Product();
+            product.setProductId(productId);
+            review.setProduct(product);
+
+            //Save the review in two databases. Save the MySql first, which will generate then
+            // auto-generate the Id and that same Id is used in the MongoDb insert
+            Review mysqlReview = reviewRdbmsRepository.save(review);
+            reviewMongoRepository.save(review);
 
             URI location = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .buildAndExpand(productId)
                     .toUri();
-
-            return ResponseEntity.created(location).body(savedReview);
+        return ResponseEntity.created(location).body(mysqlReview);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -66,6 +76,19 @@ public class ReviewsController {
      */
     @RequestMapping(value = "/products/{id}", method = RequestMethod.GET)
     public ResponseEntity<List<Review>> listReviewsForProduct(@PathVariable("id") Long productId) {
-        return new ResponseEntity<>(reviewRepository.getReviewsByProductProductId(productId), HttpStatus.OK);
+        try {
+            Review review = new Review();
+            Product product = new Product();
+            product.setProductId(productId);
+            review.setProduct(product);
+
+            Example<Review> example = Example.of(review);
+            List<Review> reviews = reviewMongoRepository.findAll(example);
+
+            reviews.forEach(r -> r.setComments(commentsController.listCommentsForReview(r.getReviewId()).getBody()));
+            return new ResponseEntity<>(reviews, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(reviewRdbmsRepository.getReviewsByProductProductId(productId), HttpStatus.OK);
+        }
     }
 }

@@ -3,10 +3,8 @@ package com.udacity.course3.reviews;
 import com.udacity.course3.reviews.repository.Comment;
 import com.udacity.course3.reviews.repository.Product;
 import com.udacity.course3.reviews.repository.Review;
-import org.springframework.boot.test.json.JsonContent;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class TestUtils {

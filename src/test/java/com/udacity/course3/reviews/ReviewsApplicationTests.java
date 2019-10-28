@@ -1,32 +1,44 @@
 package com.udacity.course3.reviews;
 
-import com.udacity.course3.reviews.repository.*;
+import com.mongodb.MongoClient;
+import com.udacity.course3.reviews.repository.Comment;
+import com.udacity.course3.reviews.repository.Product;
+import com.udacity.course3.reviews.repository.Review;
+import de.flapdoodle.embed.mongo.MongodExecutable;
+import de.flapdoodle.embed.mongo.MongodStarter;
+import de.flapdoodle.embed.mongo.config.IMongodConfig;
+import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
+import de.flapdoodle.embed.mongo.config.Net;
+import de.flapdoodle.embed.mongo.distribution.Version;
+import de.flapdoodle.embed.process.runtime.Network;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static junit.framework.TestCase.assertTrue;
+
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 
+/**
+ * The test embeds H2 and Mongo.
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes=ReviewsApplication.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)  //drops and
 // recreates H2 database upon each each execution
 public class ReviewsApplicationTests {
@@ -48,9 +60,23 @@ public class ReviewsApplicationTests {
 	private Comment savedSampleComment;
 	private HttpEntity<Comment> commentHttpEntity;
 	private ResponseEntity<Comment> sampleCommentResponse;
+	private MongodExecutable mongodExecutable;
+	private MongoTemplate mongoTemplate;
 
 	@Before
-	public void init() {
+	public void setup() throws Exception {
+		String ip = "localhost";
+		int mongoPort = 27017;
+
+		IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
+				.net(new Net(ip, mongoPort, Network.localhostIsIPv6()))
+				.build();
+
+		MongodStarter starter = MongodStarter.getDefaultInstance();
+		mongodExecutable = starter.prepare(mongodConfig);
+		mongodExecutable.start();
+		mongoTemplate = new MongoTemplate(new MongoClient(ip, mongoPort), "review");
+
 		headers = new HttpHeaders();
 		restTemplate = new TestRestTemplate();
 		headers.add("content-type", "application/json");
@@ -58,8 +84,7 @@ public class ReviewsApplicationTests {
 		testProduct = new Product();
 		testProduct.setProductName(TestUtils.getProducts().get(0).getProductName());
 		productHttpEntity = new HttpEntity<>(testProduct, headers);
-		sampleProductResponse = restTemplate.postForEntity(
-				getProductURL(Optional.empty()), productHttpEntity, Product.class);
+		sampleProductResponse = restTemplate.postForEntity(getProductURL(Optional.empty()), productHttpEntity, Product.class);
 		savedSampleProduct = sampleProductResponse.getBody();
 
 		testReview = new Review();
@@ -72,12 +97,20 @@ public class ReviewsApplicationTests {
 		testComment.setComment(TestUtils.getComments().get(0).getComment());
 		commentHttpEntity = new HttpEntity<>(testComment, headers);
 		sampleCommentResponse = restTemplate.postForEntity(getCommentURL(savedSampleReview.getReviewId()),
-		commentHttpEntity, Comment.class);
+				commentHttpEntity, Comment.class);
 		savedSampleComment = sampleCommentResponse.getBody();
+	}
+
+	@After
+	public void clean() {
+		mongodExecutable.stop();
+		System.out.println("Execute clean()");
 	}
 
 	@Test
 	public void createProductTest() {
+		System.out.println("Execute test()");
+
 		Assert.assertEquals(HttpStatus.CREATED, sampleProductResponse.getStatusCode());
 		Assert.assertEquals(getProductURL(Optional.of(savedSampleProduct.getProductId())), sampleProductResponse.getHeaders().getLocation().toString());
 		Assert.assertEquals(testProduct.getProductName(), savedSampleProduct.getProductName());
@@ -97,16 +130,6 @@ public class ReviewsApplicationTests {
 				.empty()), HttpMethod.GET, null, new ParameterizedTypeReference<List<Product>>() {});
 		Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
 		Assert.assertThat(response.getBody().size(),  is(greaterThanOrEqualTo(2)));
-	}
-
-	@Test
-	public void checkThatReviewAndCommentIsPopulatedOnRetrieveProductTest() {
-		restTemplate.postForEntity(getProductURL(Optional.empty()), productHttpEntity, Product.class);
-		ResponseEntity<Product> response = restTemplate.exchange(getProductURL(Optional.of
-				(savedSampleProduct.getProductId())), HttpMethod.GET, null, Product.class);
-		Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-		Assert.assertThat(response.getBody().getReviews().size(),  is(greaterThanOrEqualTo(1)));
-		Assert.assertThat(response.getBody().getReviews().get(0).getComments().size(),  is(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test

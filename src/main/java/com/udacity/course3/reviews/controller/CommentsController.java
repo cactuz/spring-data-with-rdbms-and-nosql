@@ -1,7 +1,11 @@
 package com.udacity.course3.reviews.controller;
 
-import com.udacity.course3.reviews.repository.*;
+import com.udacity.course3.reviews.repository.Comment;
+import com.udacity.course3.reviews.repository.Review;
+import com.udacity.course3.reviews.repository.mongodb.ReviewMongoRepository;
+import com.udacity.course3.reviews.repository.mysql.ReviewRdbmsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +13,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Spring REST controller for working with comment entity.
@@ -19,9 +22,13 @@ import java.util.Optional;
 public class CommentsController {
 
     @Autowired
-    CommentRepository commentRepository;
+    com.udacity.course3.reviews.repository.mysql.CommentRdbmsRepository commentRdbmsRepository;
     @Autowired
-    ReviewRepository reviewRepository;
+    ReviewRdbmsRepository reviewRdbmsRepository;
+    @Autowired
+    ReviewMongoRepository reviewMongoRepository;
+    @Autowired
+    com.udacity.course3.reviews.repository.mongodb.CommentMongoRepository commentMongoRepository;
 
     /**
      * Creates a comment for a review.
@@ -35,10 +42,12 @@ public class CommentsController {
     @RequestMapping(value = "/reviews/{id}", method = RequestMethod.POST)
     public ResponseEntity<Comment> createCommentForReview(@PathVariable("id") Long reviewId,
                                                           @RequestBody Comment comment) {
-        Optional<Review> review = reviewRepository.findById(reviewId);
-        if (review.isPresent()) {
-            comment.setReview(review.get());
-            Comment savedComment = commentRepository.save(comment);
+        if (reviewRdbmsRepository.existsById(reviewId)) {
+            Review review = new Review();
+            review.setReviewId(reviewId);
+            comment.setReview(review);
+            Comment savedComment = commentRdbmsRepository.save(comment);
+            commentMongoRepository.save(comment);
 
             URI location = ServletUriComponentsBuilder
                     .fromCurrentRequest()
@@ -53,7 +62,7 @@ public class CommentsController {
     /**
      * List comments for a review.
      *
-     * 2. Checks for existence of review.
+     * 2. Checks for existence of review from the .
      * 3. If review not found, returns NOT_FOUND.
      * 4. If found, returns list of comments.
      *
@@ -61,6 +70,18 @@ public class CommentsController {
      */
     @RequestMapping(value = "/reviews/{id}", method = RequestMethod.GET)
     public ResponseEntity<List<Comment>> listCommentsForReview(@PathVariable("id") Long reviewId) {
-        return new ResponseEntity<List<Comment>>(commentRepository.getCommentByReviewReviewId(reviewId), HttpStatus.OK);
+        try {
+            List<Comment> comments;
+            Comment comment = new Comment();
+            Review review = new Review();
+            review.setReviewId(reviewId);
+            comment.setReview(review);
+            Example<Comment> example = Example.of(comment);
+            comments = commentMongoRepository.findAll(example);
+
+            return new ResponseEntity<>(comments, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(commentRdbmsRepository.getCommentByReviewReviewId(reviewId), HttpStatus.OK);
+        }
     }
 }
