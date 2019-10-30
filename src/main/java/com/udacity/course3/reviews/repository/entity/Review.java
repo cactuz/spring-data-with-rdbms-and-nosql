@@ -1,6 +1,8 @@
-package com.udacity.course3.reviews.repository;
+package com.udacity.course3.reviews.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.udacity.course3.reviews.repository.entity.Comment;
+import com.udacity.course3.reviews.repository.entity.Product;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 

@@ -1,4 +1,4 @@
-package com.udacity.course3.reviews.repository;
+package com.udacity.course3.reviews.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;

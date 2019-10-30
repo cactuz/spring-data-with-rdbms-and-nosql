@@ -1,6 +1,6 @@
 package com.udacity.course3.reviews.controller;
 
-import com.udacity.course3.reviews.repository.Product;
+import com.udacity.course3.reviews.repository.entity.Product;
 import com.udacity.course3.reviews.repository.mysql.ProductRdbmsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
