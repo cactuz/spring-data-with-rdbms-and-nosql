@@ -1,12 +1,13 @@
 package com.udacity.course3.reviews;
 
 import com.udacity.course3.reviews.controller.ProductsController;
-import com.udacity.course3.reviews.repository.Comment;
-import com.udacity.course3.reviews.repository.Product;
+import com.udacity.course3.reviews.repository.entity.Product;
 import com.udacity.course3.reviews.repository.mysql.CommentRdbmsRepository;
 import com.udacity.course3.reviews.repository.mysql.ProductRdbmsRepository;
 
 import com.udacity.course3.reviews.repository.mysql.ReviewRdbmsRepository;
+import com.udacity.course3.reviews.util.FakeMongo;
+import com.udacity.course3.reviews.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;

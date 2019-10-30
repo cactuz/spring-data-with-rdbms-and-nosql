@@ -1,4 +1,4 @@
-package com.udacity.course3.reviews;
+package com.udacity.course3.reviews.util;
 
 import com.github.fakemongo.Fongo;
 import com.mongodb.MongoClient;

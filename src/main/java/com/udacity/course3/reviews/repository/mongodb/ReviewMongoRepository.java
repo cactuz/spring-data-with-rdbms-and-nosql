@@ -1,10 +1,8 @@
 package com.udacity.course3.reviews.repository.mongodb;
 
-import com.udacity.course3.reviews.repository.Review;
+import com.udacity.course3.reviews.repository.entity.Review;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * This is the mongodb repository for the entity Review.

@@ -1,13 +1,15 @@
 package com.udacity.course3.reviews;
 
 import com.udacity.course3.reviews.controller.CommentsController;
-import com.udacity.course3.reviews.repository.Comment;
+import com.udacity.course3.reviews.repository.entity.Comment;
 import com.udacity.course3.reviews.repository.mongodb.CommentMongoRepository;
 import com.udacity.course3.reviews.repository.mongodb.ReviewMongoRepository;
 import com.udacity.course3.reviews.repository.mysql.CommentRdbmsRepository;
-import com.udacity.course3.reviews.repository.Review;
+import com.udacity.course3.reviews.repository.entity.Review;
 import com.udacity.course3.reviews.repository.mysql.ProductRdbmsRepository;
 import com.udacity.course3.reviews.repository.mysql.ReviewRdbmsRepository;
+import com.udacity.course3.reviews.util.FakeMongo;
+import com.udacity.course3.reviews.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,16 +61,15 @@ public class CommentsControllerUnitTest {
 
     @Test
     public void addACommentTest() throws Exception{
-        Mockito.when(reviewMongoRepository.existsById(Mockito.anyLong())).thenReturn(true);
-        Mockito.when(commentRdbmsRepository.save(Mockito.any())).thenReturn(comments.get(0));
+        Mockito.when(reviewRdbmsRepository.existsById(Mockito.anyLong())).thenReturn(true);
+        Mockito.when(commentMongoRepository.save(Mockito.any())).thenReturn(comments.get(0));
 
         this.mockMvc.perform(post(COMMENTS_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"comment\" : " + "\"" + comments.get(0).getComment() + "\"}")
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding("utf-8"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.comment").value(comments.get(0).getComment()));
+                .andExpect(status().isCreated());
     }
 
     @Test

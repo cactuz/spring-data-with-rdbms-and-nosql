@@ -2,12 +2,14 @@ package com.udacity.course3.reviews;
 
 import com.udacity.course3.reviews.controller.CommentsController;
 import com.udacity.course3.reviews.controller.ReviewsController;
-import com.udacity.course3.reviews.repository.Product;
+import com.udacity.course3.reviews.repository.entity.Product;
 import com.udacity.course3.reviews.repository.mongodb.ReviewMongoRepository;
 import com.udacity.course3.reviews.repository.mysql.CommentRdbmsRepository;
 import com.udacity.course3.reviews.repository.mysql.ProductRdbmsRepository;
-import com.udacity.course3.reviews.repository.Review;
+import com.udacity.course3.reviews.repository.entity.Review;
 import com.udacity.course3.reviews.repository.mysql.ReviewRdbmsRepository;
+import com.udacity.course3.reviews.util.FakeMongo;
+import com.udacity.course3.reviews.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

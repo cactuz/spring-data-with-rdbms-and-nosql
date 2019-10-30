@@ -1,8 +1,8 @@
-package com.udacity.course3.reviews;
+package com.udacity.course3.reviews.util;
 
-import com.udacity.course3.reviews.repository.Comment;
-import com.udacity.course3.reviews.repository.Product;
-import com.udacity.course3.reviews.repository.Review;
+import com.udacity.course3.reviews.repository.entity.Comment;
+import com.udacity.course3.reviews.repository.entity.Product;
+import com.udacity.course3.reviews.repository.entity.Review;
 
 import java.util.ArrayList;
 import java.util.List;
